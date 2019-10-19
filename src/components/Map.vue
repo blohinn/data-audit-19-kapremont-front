@@ -1,17 +1,29 @@
 <template>
-  <div id="map" class="map"></div>
+  <div class="map-wrapper">
+    <div id="map" class="map"></div>
+    <Modal
+      v-if="modalOpened && selectedMarker"
+      v-on:modalClosed="modalOpened = false"
+      v-bind:pk="selectedMarker.meta"
+    ></Modal>
+  </div>
 </template>
 
 <script>
+import Modal from "@/components/Modal";
+
 export default {
   name: "Map",
+  components: { Modal },
   data() {
     return {
       leaflet: null,
       map: null,
       markersLayerGroup: null,
       data: [],
-      markers: []
+      markers: [],
+      modalOpened: true,
+      selectedMarker: null
     };
   },
   methods: {
@@ -21,6 +33,11 @@ export default {
           lat: 55.796289,
           lng: 49.108795,
           meta: 1111
+        },
+        {
+          lat: 55.796085,
+          lng: 49.10809,
+          meta: 2222
         }
       ];
     },
@@ -28,7 +45,10 @@ export default {
       this.data.forEach(house => {
         let marker = this.leafet
           .marker([house.lat, house.lng])
-          .on("click", e => console.log(e));
+          .on("click", e => {
+            this.selectedMarker = e.target.meta;
+            this.modalOpened = true;
+          });
         marker.meta = house;
         marker.addTo(this.markersLayerGroup);
       });
@@ -62,6 +82,11 @@ export default {
 </script>
 
 <style scoped>
+.map-wrapper {
+  height: 100%;
+  width: 100%;
+}
+
 .map {
   height: 100%;
   width: 100%;
