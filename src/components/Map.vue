@@ -4,7 +4,7 @@
     <Modal
       v-if="modalOpened && selectedMarker"
       v-on:modalClosed="modalOpened = false"
-      v-bind:pk="selectedMarker.meta"
+      v-bind:data="selectedMarker"
     ></Modal>
   </div>
 </template>
@@ -23,29 +23,34 @@ export default {
       data: [],
       markers: [],
       modalOpened: true,
-      selectedMarker: null
+      selectedMarker: null,
+      redIcon: new L.Icon({
+        iconUrl:
+          "https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
+        shadowUrl:
+          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+      })
     };
   },
   methods: {
     fetchData() {
-      this.data = [
-        {
-          lat: 55.796289,
-          lng: 49.108795,
-          meta: 1111
-        },
-        {
-          lat: 55.796085,
-          lng: 49.10809,
-          meta: 2222
-        }
-      ];
+      const axios = require("axios");
+      axios.get("http://127.0.0.1:8000/api/hackaton/").then(response => {
+        // handle success
+        this.data = response.data;
+        this.insertMarkers();
+      });
     },
     insertMarkers() {
       this.data.forEach(house => {
         let marker = this.leafet
-          .marker([house.lat, house.lng])
+          .marker([house.lat, house.lng], { icon: this.redIcon })
           .on("click", e => {
+            console.log(e);
             this.selectedMarker = e.target.meta;
             this.modalOpened = true;
           });
